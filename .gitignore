@@ -26,3 +26,9 @@ node_modules/
 # IDE
 .vscode/
 .idea/
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+tfplan
+*.tfplan

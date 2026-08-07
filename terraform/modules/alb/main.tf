@@ -1,5 +1,5 @@
 resource "aws_security_group" "alb" {
-  name        = "${var.project_name}-${var.environment}-alb-sg"
+  name        = "mcdp-${var.environment}-alb-sg"
   description = "Security group for Application Load Balancer"
   vpc_id      = var.vpc_id
 
@@ -27,12 +27,12 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-alb-sg"
+    Name = "mcdp-${var.environment}-alb-sg"
   }
 }
 
 resource "aws_lb" "this" {
-  name               = "${var.project_name}-${var.environment}-alb"
+  name               = "mcdp-${var.environment}-alb"
   internal           = false
   load_balancer_type = "application"
 
@@ -43,12 +43,12 @@ resource "aws_lb" "this" {
   subnets = var.public_subnet_ids
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-alb"
+    Name = "mcdp-${var.environment}-alb"
   }
 }
 
 resource "aws_lb_target_group" "this" {
-  name     = "${var.project_name}-${var.environment}-tg"
+  name     = "mcdp-${var.environment}-tg"
   port     = var.target_port
   protocol = "HTTP"
   vpc_id   = var.vpc_id
@@ -67,7 +67,7 @@ resource "aws_lb_target_group" "this" {
   }
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-tg"
+    Name = "mcdp-${var.environment}-tg"
   }
 }
 
@@ -90,5 +90,6 @@ resource "aws_lb_listener" "http" {
         arn = aws_lb_target_group.this.arn
       }
     }
+
   }
 }

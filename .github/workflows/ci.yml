@@ -1,57 +1,41 @@
-name: CI
+name: Multi-Cloud CI
 
 on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     branches:
       - main
 
 jobs:
-  validate:
-    name: Validate Project
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Terraform AWS format
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform AWS validation
-        working-directory: terraform/aws
-        run: |
-          terraform init -backend=false
-          terraform fmt -check
-          terraform validate
-
-      - name: Terraform Azure validation
-        working-directory: terraform/azure
-        run: |
-          terraform init -backend=false
-          terraform fmt -check
-          terraform validate
-
-  docker:
-    name: Build Docker Images
+  terraform-check:
+    name: Terraform Validation
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        service:
-          - frontend
-          - backend
-          - nginx
+        cloud:
+          - aws
+          - azure
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Build ${{ matrix.service }}
-        run: |
-          docker build \
-            -t multi-cloud-${{ matrix.service }}:latest \
-            ./docker/${{ matrix.service }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Terraform Format Check
+        working-directory: terraform/${{ matrix.cloud }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        working-directory: terraform/${{ matrix.cloud }}
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: terraform/${{ matrix.cloud }}
+        run: terraform validate

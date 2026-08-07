@@ -1,104 +1,78 @@
-name: CD
+name: Multi-Cloud CD
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
-
-env:
-  AWS_REGION: ap-south-1
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Build and Push Images
-    runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        service:
-          - frontend
-          - backend
-          - nginx
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build image
-        run: |
-          docker build \
-            -t ${{ secrets.DOCKER_USERNAME }}/multi-cloud-${{ matrix.service }}:latest \
-            ./docker/${{ matrix.service }}
-
-      - name: Push image
-        run: |
-          docker push \
-            ${{ secrets.DOCKER_USERNAME }}/multi-cloud-${{ matrix.service }}:latest
-
-  deploy:
-    name: Deploy Kubernetes
-    needs: build
+  deploy-aws:
+    name: Deploy AWS Infrastructure
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Configure AWS
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
 
-      - name: Configure kubeconfig
-        run: |
-          aws eks update-kubeconfig \
-            --region $AWS_REGION \
-            --name ${{ secrets.EKS_CLUSTER_NAME }}
+      - name: Terraform Init
+        working-directory: terraform/aws
+        run: terraform init
 
-      - name: Update image names
-        run: |
-          sed -i \
-            "s|DOCKER_USERNAME|${{ secrets.DOCKER_USERNAME }}|g" \
-            kubernetes/frontend-deployment.yaml
+      - name: Terraform Plan
+        working-directory: terraform/aws
+        run: terraform plan
 
-          sed -i \
-            "s|DOCKER_USERNAME|${{ secrets.DOCKER_USERNAME }}|g" \
-            kubernetes/backend-deployment.yaml
+      - name: Terraform Apply
+        working-directory: terraform/aws
+        run: terraform apply -auto-approve
 
-      - name: Deploy namespace
-        run: kubectl apply -f kubernetes/namespace.yaml
 
-      - name: Deploy ConfigMap
-        run: kubectl apply -f kubernetes/configmap.yaml
+  deploy-azure:
+    name: Deploy Azure Infrastructure
+    runs-on: ubuntu-latest
 
-      - name: Deploy frontend
-        run: kubectl apply -f kubernetes/frontend-deployment.yaml
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Deploy frontend service
-        run: kubectl apply -f kubernetes/frontend-service.yaml
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: |
+            {
+              "clientId": "${{ secrets.AZURE_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
+              "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
+              "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
+            }
 
-      - name: Deploy backend
-        run: kubectl apply -f kubernetes/backend-deployment.yaml
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
 
-      - name: Deploy backend service
-        run: kubectl apply -f kubernetes/backend-service.yaml
+      - name: Terraform Init
+        working-directory: terraform/azure
+        run: terraform init
 
-      - name: Deploy ingress
-        run: kubectl apply -f kubernetes/ingress.yaml
+      - name: Terraform Plan
+        working-directory: terraform/azure
+        run: terraform plan
 
-      - name: Check deployment
-        run: |
-          kubectl get pods -n multi-cloud
-          kubectl get svc -n multi-cloud
+      - name: Terraform Apply
+        working-directory: terraform/azure
+        run: terraform apply -auto-approve
