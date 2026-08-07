@@ -1,4 +1,4 @@
-aws_region  = "ap-south-1"
+aws_region   = "ap-south-1"
 project_name = "multi-cloud-devops-platform"
 environment  = "prod"
 
@@ -21,10 +21,8 @@ private_subnet_cidrs = [
 
 instance_type = "t3.micro"
 
-# Use your existing EC2 key pair name.
 key_name = "your-key-pair-name"
 
-# Leave empty to automatically find Ubuntu 24.04.
 ami_id = ""
 
 eks_cluster_version = "1.33"
@@ -40,7 +38,6 @@ eks_max_nodes     = 3
 db_name     = "appdb"
 db_username = "admin"
 
-# Change this password.
 db_password = "ChangeThisStrongPassword123!"
 
 db_instance_class = "db.t3.micro"
