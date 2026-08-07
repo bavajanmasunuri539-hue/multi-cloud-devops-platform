@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    name: Validate Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Terraform AWS format
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform AWS validation
+        working-directory: terraform/aws
+        run: |
+          terraform init -backend=false
+          terraform fmt -check
+          terraform validate
+
+      - name: Terraform Azure validation
+        working-directory: terraform/azure
+        run: |
+          terraform init -backend=false
+          terraform fmt -check
+          terraform validate
+
+  docker:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          - frontend
+          - backend
+          - nginx
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build ${{ matrix.service }}
+        run: |
+          docker build \
+            -t multi-cloud-${{ matrix.service }}:latest \
+            ./docker/${{ matrix.service }}
