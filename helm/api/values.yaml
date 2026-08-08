@@ -1,9 +1,9 @@
 replicaCount: 2
 
 image:
-  repository: your-dockerhub-username/api
-  tag: "latest"
-  pullPolicy: IfNotPresent
+repository: bavajan12/golang-api
+tag: "latest"
+pullPolicy: IfNotPresent
 
 imagePullSecrets: []
 
@@ -11,71 +11,65 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  create: true
-  automount: true
-  annotations: {}
-  name: ""
+create: true
+automount: true
+annotations: {}
+name: ""
 
 podAnnotations: {}
-
 podLabels: {}
 
 podSecurityContext:
-  fsGroup: 1000
+fsGroup: 1000
 
 securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-      - ALL
+allowPrivilegeEscalation: false
+capabilities:
+drop:
+- ALL
 
-containerPort: 8000
+containerPort: 8080
 
 service:
-  type: ClusterIP
-  port: 8000
-  targetPort: 8000
+type: ClusterIP
+port: 8080
+targetPort: 8080
 
 config:
-  APP_ENV: production
-  LOG_LEVEL: info
+APP_ENV: production
+LOG_LEVEL: info
 
 resources:
-  requests:
-    cpu: 100m
-    memory: 128Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
+requests:
+cpu: 100m
+memory: 128Mi
+limits:
+cpu: 500m
+memory: 512Mi
 
 livenessProbe:
-  enabled: true
-  path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 10
+enabled: true
+path: /health
+initialDelaySeconds: 30
+periodSeconds: 10
 
 readinessProbe:
-  enabled: true
-  path: /health
-  initialDelaySeconds: 10
-  periodSeconds: 5
+enabled: true
+path: /health
+initialDelaySeconds: 10
+periodSeconds: 5
 
 ingress:
-  enabled: false
-  className: nginx
-
-  annotations: {}
-
-  hosts:
-    - host: api.example.com
-      paths:
-        - path: /
-          pathType: Prefix
-
-  tls: []
+enabled: false
+className: nginx
+annotations: {}
+hosts:
+- host: api.example.com
+paths:
+- path: /
+pathType: Prefix
+tls: []
 
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}

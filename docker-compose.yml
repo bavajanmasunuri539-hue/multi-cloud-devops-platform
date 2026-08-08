@@ -1,0 +1,39 @@
+services:
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: multi-cloud-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - multi-cloud-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: multi-cloud-backend
+    ports:
+      - "8083:8080"
+    depends_on:
+      - api
+    networks:
+      - multi-cloud-network
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: multi-cloud-api
+    ports:
+      - "8082:8080"
+    networks:
+      - multi-cloud-network
+
+networks:
+  multi-cloud-network:
+    driver: bridge

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: multi-cloud-config
+  namespace: multi-cloud
+data:
+  API_URL: "http://api:8080"
+  BACKEND_URL: "http://backend:8080"
+  ENVIRONMENT: "production"

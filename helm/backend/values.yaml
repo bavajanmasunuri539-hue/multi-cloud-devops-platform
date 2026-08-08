@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: your-dockerhub-username/backend
+  repository: bavajan12/python-backend
   tag: "latest"
   pullPolicy: IfNotPresent
 
@@ -17,7 +17,6 @@ serviceAccount:
   name: ""
 
 podAnnotations: {}
-
 podLabels: {}
 
 podSecurityContext:
@@ -29,12 +28,12 @@ securityContext:
     drop:
       - ALL
 
-containerPort: 8080
+containerPort: 5000
 
 service:
   type: ClusterIP
-  port: 8080
-  targetPort: 8080
+  port: 5000
+  targetPort: 5000
 
 config:
   APP_ENV: production
@@ -50,32 +49,27 @@ resources:
 
 livenessProbe:
   enabled: true
-  path: /actuator/health
+  path: /health
   initialDelaySeconds: 30
   periodSeconds: 10
 
 readinessProbe:
   enabled: true
-  path: /actuator/health
+  path: /health
   initialDelaySeconds: 10
   periodSeconds: 5
 
 ingress:
   enabled: false
   className: nginx
-
   annotations: {}
-
   hosts:
     - host: backend.example.com
       paths:
         - path: /
           pathType: Prefix
-
   tls: []
 
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}

@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: your-dockerhub-username/frontend
+  repository: bavajan12/frontend
   tag: "latest"
   pullPolicy: IfNotPresent
 
@@ -17,7 +17,6 @@ serviceAccount:
   name: ""
 
 podAnnotations: {}
-
 podLabels: {}
 
 podSecurityContext:
@@ -29,12 +28,12 @@ securityContext:
     drop:
       - ALL
 
-containerPort: 80
+containerPort: 3000
 
 service:
   type: ClusterIP
-  port: 80
-  targetPort: 80
+  port: 3000
+  targetPort: 3000
 
 config:
   APP_ENV: production
@@ -62,15 +61,12 @@ readinessProbe:
 ingress:
   enabled: false
   className: nginx
-
   annotations: {}
-
   hosts:
     - host: multi-cloud-devops.example.com
       paths:
         - path: /
           pathType: Prefix
-
   tls: []
 
 nodeSelector: {}
