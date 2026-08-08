@@ -1,0 +1,30 @@
+api:
+  replicaCount: 1
+
+  image:
+    tag: "dev"
+
+  config:
+    APP_ENV: development
+    LOG_LEVEL: debug
+
+
+backend:
+  replicaCount: 1
+
+  image:
+    tag: "dev"
+
+  config:
+    APP_ENV: development
+    LOG_LEVEL: debug
+
+
+frontend:
+  replicaCount: 1
+
+  image:
+    tag: "dev"
+
+  config:
+    APP_ENV: development

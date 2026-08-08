@@ -1,0 +1,30 @@
+api:
+  replicaCount: 3
+
+  image:
+    tag: "1.0.0"
+
+  config:
+    APP_ENV: production
+    LOG_LEVEL: info
+
+
+backend:
+  replicaCount: 3
+
+  image:
+    tag: "1.0.0"
+
+  config:
+    APP_ENV: production
+    LOG_LEVEL: info
+
+
+frontend:
+  replicaCount: 3
+
+  image:
+    tag: "1.0.0"
+
+  config:
+    APP_ENV: production

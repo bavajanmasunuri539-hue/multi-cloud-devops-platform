@@ -1,0 +1,81 @@
+replicaCount: 2
+
+image:
+  repository: your-dockerhub-username/api
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+containerPort: 8000
+
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+config:
+  APP_ENV: production
+  LOG_LEVEL: info
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+livenessProbe:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+ingress:
+  enabled: false
+  className: nginx
+
+  annotations: {}
+
+  hosts:
+    - host: api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+  tls: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
