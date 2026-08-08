@@ -1,18 +1,27 @@
-FROM golang:1.23-alpine AS builder
+# Build stage
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
-COPY . .
+COPY src/go.mod src/go.sum* ./
 
 RUN go mod download
-RUN go build -o api-service .
 
-FROM alpine:3.20
+COPY src/ .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o api .
+
+# Runtime stage
+FROM alpine:3.22
 
 WORKDIR /app
 
-COPY --from=builder /app/api-service .
+RUN adduser -D appuser
+
+COPY --from=builder /app/api .
+
+USER appuser
 
 EXPOSE 8080
 
-CMD ["./api-service"]
+CMD ["./api"]
