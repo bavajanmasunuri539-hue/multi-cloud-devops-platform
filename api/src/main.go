@@ -26,6 +26,7 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/api/health", healthHandler)
 
 	log.Println("API service running on port 8080")
 
