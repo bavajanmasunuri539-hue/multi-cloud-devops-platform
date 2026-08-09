@@ -1,78 +1,110 @@
-name: Multi-Cloud CD
+name: CD
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
     branches:
       - main
-  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NAMESPACE: multi-cloud
 
 jobs:
-
-  deploy-aws:
-    name: Deploy AWS Infrastructure
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.8
-
-      - name: Terraform Init
-        working-directory: terraform/aws
-        run: terraform init
-
-      - name: Terraform Plan
-        working-directory: terraform/aws
-        run: terraform plan
-
-      - name: Terraform Apply
-        working-directory: terraform/aws
-        run: terraform apply -auto-approve
-
-
-  deploy-azure:
-    name: Deploy Azure Infrastructure
-    runs-on: ubuntu-latest
+  deploy:
+    name: Deploy to Kubernetes
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: |
-            {
-              "clientId": "${{ secrets.AZURE_CLIENT_ID }}",
-              "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
-              "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
-              "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
-            }
+      - name: Check Kubernetes
+        run: |
+          kubectl version --client
+          kubectl get nodes
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.8
+      - name: Create namespace
+        run: |
+          kubectl create namespace ${{ env.NAMESPACE }} \
+            --dry-run=client \
+            -o yaml | kubectl apply -f -
 
-      - name: Terraform Init
-        working-directory: terraform/azure
-        run: terraform init
+      - name: Helm version
+        run: helm version
 
-      - name: Terraform Plan
-        working-directory: terraform/azure
-        run: terraform plan
+      - name: Lint API chart
+        run: |
+          helm lint ./helm/api
 
-      - name: Terraform Apply
-        working-directory: terraform/azure
-        run: terraform apply -auto-approve
+      - name: Lint Backend chart
+        run: |
+          helm lint ./helm/backend
+
+      - name: Lint Frontend chart
+        run: |
+          helm lint ./helm/frontend
+
+      - name: Set image tag
+        id: tag
+        run: |
+          echo "tag=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy API
+        run: |
+          helm upgrade --install api ./helm/api \
+            --namespace ${{ env.NAMESPACE }} \
+            --create-namespace \
+            --set image.tag=${{ steps.tag.outputs.tag }}
+
+      - name: Deploy Backend
+        run: |
+          helm upgrade --install backend ./helm/backend \
+            --namespace ${{ env.NAMESPACE }} \
+            --create-namespace \
+            --set image.tag=${{ steps.tag.outputs.tag }}
+
+      - name: Deploy Frontend
+        run: |
+          helm upgrade --install frontend ./helm/frontend \
+            --namespace ${{ env.NAMESPACE }} \
+            --create-namespace \
+            --set image.tag=${{ steps.tag.outputs.tag }}
+
+      - name: Wait for API
+        run: |
+          kubectl rollout status \
+            deployment/api-api \
+            -n ${{ env.NAMESPACE }} \
+            --timeout=180s
+
+      - name: Wait for Backend
+        run: |
+          kubectl rollout status \
+            deployment/backend-backend \
+            -n ${{ env.NAMESPACE }} \
+            --timeout=180s
+
+      - name: Wait for Frontend
+        run: |
+          kubectl rollout status \
+            deployment/frontend-frontend \
+            -n ${{ env.NAMESPACE }} \
+            --timeout=180s
+
+      - name: Show pods
+        run: |
+          kubectl get pods \
+            -n ${{ env.NAMESPACE }} \
+            -o wide
+
+      - name: Show services
+        run: |
+          kubectl get services \
+            -n ${{ env.NAMESPACE }}
