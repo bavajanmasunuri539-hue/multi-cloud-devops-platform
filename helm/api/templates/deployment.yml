@@ -1,65 +1,46 @@
 apiVersion: apps/v1
 kind: Deployment
-
 metadata:
   name: {{ include "api.fullname" . }}
   labels:
     {{- include "api.labels" . | nindent 4 }}
-
 spec:
   replicas: {{ .Values.replicaCount }}
-
   selector:
     matchLabels:
       {{- include "api.selectorLabels" . | nindent 6 }}
-
   template:
     metadata:
       labels:
         {{- include "api.selectorLabels" . | nindent 8 }}
-
     spec:
+      serviceAccountName: {{ include "api.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: api
-
-          image: "bavajan12/golang-api:latest"
-          imagePullPolicy: IfNotPresent
-
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-
+            {{- toYaml .Values.securityContext | nindent 12 }}
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: {{ .Values.containerPort }}
               protocol: TCP
-
-          env:
-            - name: APP_ENV
-              value: "production"
-            - name: LOG_LEVEL
-              value: "info"
-
+          envFrom:
+            - configMapRef:
+                name: {{ include "api.fullname" . }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.livenessProbe.path }}
               port: http
-            initialDelaySeconds: 30
-            periodSeconds: 10
-
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           readinessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.readinessProbe.path }}
               port: http
-            initialDelaySeconds: 10
-            periodSeconds: 5
-
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
+            {{- toYaml .Values.resources | nindent 12 }}

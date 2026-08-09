@@ -1,9 +1,9 @@
 replicaCount: 2
 
 image:
-  repository: bavajan12/frontend
+  repository: 114403655423.dkr.ecr.ap-south-1.amazonaws.com/multi-cloud-devops-platform/frontend
+  pullPolicy: Always
   tag: "latest"
-  pullPolicy: IfNotPresent
 
 imagePullSecrets: []
 
@@ -11,7 +11,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  create: true
+  create: false
   automount: true
   annotations: {}
   name: ""
@@ -19,55 +19,66 @@ serviceAccount:
 podAnnotations: {}
 podLabels: {}
 
-podSecurityContext:
-  fsGroup: 1000
+podSecurityContext: {}
 
 securityContext:
+  runAsNonRoot: true
+  runAsUser: 101
+  runAsGroup: 101
   allowPrivilegeEscalation: false
   capabilities:
     drop:
       - ALL
 
-containerPort: 3000
+containerPort: 8080
 
 service:
   type: ClusterIP
   port: 3000
-  targetPort: 3000
-
-config:
-  APP_ENV: production
-
-resources:
-  requests:
-    cpu: 100m
-    memory: 64Mi
-  limits:
-    cpu: 300m
-    memory: 256Mi
-
-livenessProbe:
-  enabled: true
-  path: /
-  initialDelaySeconds: 20
-  periodSeconds: 10
-
-readinessProbe:
-  enabled: true
-  path: /
-  initialDelaySeconds: 10
-  periodSeconds: 5
+  targetPort: 8080
 
 ingress:
-  enabled: false
+  enabled: true
   className: nginx
   annotations: {}
   hosts:
-    - host: multi-cloud-devops.example.com
+    - host: frontend.local
       paths:
         - path: /
           pathType: Prefix
   tls: []
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
 
 nodeSelector: {}
 

@@ -1,11 +1,10 @@
-name: CI
+﻿name: CI
 
 on:
   push:
     branches:
       - main
       - develop
-
   pull_request:
     branches:
       - main
@@ -15,238 +14,137 @@ permissions:
   contents: read
 
 env:
-  NEXUS_REGISTRY: ${{ secrets.NEXUS_REGISTRY }}
+  AWS_REGION: ap-south-1
+  ECR_REGISTRY: 114403655423.dkr.ecr.ap-south-1.amazonaws.com
 
 jobs:
-
-  # ============================================================
-  # FRONTEND
-  # ============================================================
   frontend:
     name: Frontend CI
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: frontend
-
     steps:
-      - name: Checkout source code
+      - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-
       - name: Install dependencies
         run: npm ci
-
       - name: Run tests
         run: npm test -- --watchAll=false
         continue-on-error: true
-
       - name: Build frontend
         run: npm run build
 
-
-  # ============================================================
-  # BACKEND
-  # ============================================================
   backend:
     name: Backend CI
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: backend
-
     steps:
-      - name: Checkout source code
+      - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
-
       - name: Install dependencies
         run: |
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          else
-            echo "requirements.txt not found"
-          fi
-
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
       - name: Run tests
         run: |
           if [ -d tests ]; then
             pytest
+          elif [ -d src/tests ]; then
+            pytest src/tests
           else
             echo "No tests directory found"
           fi
         continue-on-error: true
 
-
-  # ============================================================
-  # GO API
-  # ============================================================
   api:
     name: Go API CI
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: api/src
-
     steps:
-      - name: Checkout source code
+      - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.26"
-
-      - name: Download Go dependencies
+          go-version: "1.24"
+      - name: Download dependencies
         run: go mod download
-
-      - name: Verify Go dependencies
+      - name: Verify dependencies
         run: go mod verify
-
-      - name: Run Go tests
+      - name: Run tests
         run: go test ./...
-
-      - name: Build Go API
+      - name: Build API
         run: go build ./...
 
-
-  # ============================================================
-  # SONARQUBE
-  # ============================================================
   sonar:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
-
     needs:
       - frontend
       - backend
       - api
-
     steps:
-      - name: Checkout source code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-
-  # ============================================================
-  # DOCKER BUILD + NEXUS PUSH
-  # ============================================================
   docker:
-    name: Build and Push Docker Images
+    name: Build and Push Images to ECR
     runs-on: ubuntu-latest
-
     needs:
       - frontend
       - backend
       - api
       - sonar
-
     steps:
-      - name: Checkout source code
+      - name: Checkout
         uses: actions/checkout@v4
-
-      # --------------------------------------------------------
-      # Create image tag
-      # --------------------------------------------------------
-      - name: Set Docker image tag
-        id: tag
-        run: |
-          echo "tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
-
-      # --------------------------------------------------------
-      # Login to Nexus
-      # --------------------------------------------------------
-      - name: Login to Nexus
-        uses: docker/login-action@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          registry: ${{ secrets.NEXUS_REGISTRY }}
-          username: ${{ secrets.NEXUS_USERNAME }}
-          password: ${{ secrets.NEXUS_PASSWORD }}
-
-      # --------------------------------------------------------
-      # Build Frontend
-      # --------------------------------------------------------
-      - name: Build Frontend Docker image
-        run: |
-          docker build \
-            -t ${{ secrets.NEXUS_REGISTRY }}/multi-cloud/frontend:${{ steps.tag.outputs.tag }} \
-            ./frontend
-
-      # --------------------------------------------------------
-      # Build Backend
-      # --------------------------------------------------------
-      - name: Build Backend Docker image
-        run: |
-          docker build \
-            -t ${{ secrets.NEXUS_REGISTRY }}/multi-cloud/backend:${{ steps.tag.outputs.tag }} \
-            ./backend
-
-      # --------------------------------------------------------
-      # Build Go API
-      # --------------------------------------------------------
-      - name: Build API Docker image
-        run: |
-          docker build \
-            -t ${{ secrets.NEXUS_REGISTRY }}/multi-cloud/api:${{ steps.tag.outputs.tag }} \
-            ./api
-
-      # --------------------------------------------------------
-      # Push Frontend
-      # --------------------------------------------------------
-      - name: Push Frontend image
-        run: |
-          docker push \
-            ${{ secrets.NEXUS_REGISTRY }}/multi-cloud/frontend:${{ steps.tag.outputs.tag }}
-
-      # --------------------------------------------------------
-      # Push Backend
-      # --------------------------------------------------------
-      - name: Push Backend image
-        run: |
-          docker push \
-            ${{ secrets.NEXUS_REGISTRY }}/multi-cloud/backend:${{ steps.tag.outputs.tag }}
-
-      # --------------------------------------------------------
-      # Push API
-      # --------------------------------------------------------
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Set image tag
+        id: tag
+        run: echo "tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+      - name: Build frontend image
+        run: docker build -t "$ECR_REGISTRY/multi-cloud-devops-platform/frontend:${{ steps.tag.outputs.tag }}" ./frontend
+      - name: Build backend image
+        run: docker build -t "$ECR_REGISTRY/multi-cloud-devops-platform/backend:${{ steps.tag.outputs.tag }}" ./backend
+      - name: Build API image
+        run: docker build -t "$ECR_REGISTRY/multi-cloud-devops-platform/api:${{ steps.tag.outputs.tag }}" ./api
+      - name: Push frontend image
+        run: docker push "$ECR_REGISTRY/multi-cloud-devops-platform/frontend:${{ steps.tag.outputs.tag }}"
+      - name: Push backend image
+        run: docker push "$ECR_REGISTRY/multi-cloud-devops-platform/backend:${{ steps.tag.outputs.tag }}"
       - name: Push API image
+        run: docker push "$ECR_REGISTRY/multi-cloud-devops-platform/api:${{ steps.tag.outputs.tag }}"
+      - name: Show pushed images
         run: |
-          docker push \
-            ${{ secrets.NEXUS_REGISTRY }}/multi-cloud/api:${{ steps.tag.outputs.tag }}
-
-      # --------------------------------------------------------
-      # Display pushed images
-      # --------------------------------------------------------
-      - name: Display image information
-        run: |
-          echo "Frontend:"
-          echo "${{ secrets.NEXUS_REGISTRY }}/multi-cloud/frontend:${{ steps.tag.outputs.tag }}"
-
-          echo "Backend:"
-          echo "${{ secrets.NEXUS_REGISTRY }}/multi-cloud/backend:${{ steps.tag.outputs.tag }}"
-
-          echo "API:"
-          echo "${{ secrets.NEXUS_REGISTRY }}/multi-cloud/api:${{ steps.tag.outputs.tag }}"
+          echo "Frontend: $ECR_REGISTRY/multi-cloud-devops-platform/frontend:${{ steps.tag.outputs.tag }}"
+          echo "Backend:  $ECR_REGISTRY/multi-cloud-devops-platform/backend:${{ steps.tag.outputs.tag }}"
+          echo "API:      $ECR_REGISTRY/multi-cloud-devops-platform/api:${{ steps.tag.outputs.tag }}"

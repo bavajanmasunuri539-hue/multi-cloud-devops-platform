@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: bavajan12/python-backend
+  repository: 114403655423.dkr.ecr.ap-south-1.amazonaws.com/multi-cloud-devops-platform/backend
   tag: "latest"
   pullPolicy: IfNotPresent
 
