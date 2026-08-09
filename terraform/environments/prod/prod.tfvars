@@ -21,7 +21,7 @@ private_subnet_cidrs = [
 
 instance_type = "t3.micro"
 
-key_name = "your-key-pair-name"
+key_name = "micro"
 
 ami_id = ""
 
@@ -36,7 +36,7 @@ eks_min_nodes     = 1
 eks_max_nodes     = 3
 
 db_name     = "appdb"
-db_username = "admin"
+db_username = "appadmin"
 
 db_password = "ChangeThisStrongPassword123!"
 

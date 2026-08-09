@@ -112,7 +112,7 @@ variable "db_name" {
 variable "db_username" {
   description = "Database username"
   type        = string
-  default     = "admin"
+  default     = "appadmin"
 }
 
 variable "db_password" {

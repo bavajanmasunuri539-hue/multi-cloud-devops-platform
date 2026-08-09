@@ -22,7 +22,7 @@ private_subnet_cidrs = [
 instance_type = "t3.micro"
 
 # Use your existing EC2 key pair name.
-key_name = "your-key-pair-name"
+key_name = "micro"
 
 # Leave empty to automatically find Ubuntu 24.04.
 ami_id = ""
@@ -38,7 +38,7 @@ eks_min_nodes     = 1
 eks_max_nodes     = 3
 
 db_name     = "appdb"
-db_username = "admin"
+db_username = "appadmin"
 
 # Change this password.
 db_password = "ChangeThisStrongPassword123!"
