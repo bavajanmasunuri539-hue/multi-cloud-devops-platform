@@ -26,85 +26,78 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check Kubernetes
+        shell: cmd
         run: |
           kubectl version --client
           kubectl get nodes
 
       - name: Create namespace
+        shell: cmd
         run: |
-          kubectl create namespace ${{ env.NAMESPACE }} \
-            --dry-run=client \
-            -o yaml | kubectl apply -f -
+          kubectl create namespace %NAMESPACE% --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Helm version
-        run: helm version
+        shell: cmd
+        run: |
+          helm version
 
       - name: Lint API chart
+        shell: cmd
         run: |
           helm lint ./helm/api
 
       - name: Lint Backend chart
+        shell: cmd
         run: |
           helm lint ./helm/backend
 
       - name: Lint Frontend chart
+        shell: cmd
         run: |
           helm lint ./helm/frontend
 
       - name: Set image tag
         id: tag
+        shell: cmd
         run: |
-          echo "tag=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          echo tag=${{ github.event.workflow_run.head_sha }}>>%GITHUB_OUTPUT%
 
       - name: Deploy API
+        shell: cmd
         run: |
-          helm upgrade --install api ./helm/api \
-            --namespace ${{ env.NAMESPACE }} \
-            --create-namespace \
-            --set image.tag=${{ steps.tag.outputs.tag }}
+          helm upgrade --install api ./helm/api --namespace %NAMESPACE% --create-namespace --set image.tag=${{ steps.tag.outputs.tag }}
 
       - name: Deploy Backend
+        shell: cmd
         run: |
-          helm upgrade --install backend ./helm/backend \
-            --namespace ${{ env.NAMESPACE }} \
-            --create-namespace \
-            --set image.tag=${{ steps.tag.outputs.tag }}
+          helm upgrade --install backend ./helm/backend --namespace %NAMESPACE% --create-namespace --set image.tag=${{ steps.tag.outputs.tag }}
 
       - name: Deploy Frontend
+        shell: cmd
         run: |
-          helm upgrade --install frontend ./helm/frontend \
-            --namespace ${{ env.NAMESPACE }} \
-            --create-namespace \
-            --set image.tag=${{ steps.tag.outputs.tag }}
+          helm upgrade --install frontend ./helm/frontend --namespace %NAMESPACE% --create-namespace --set image.tag=${{ steps.tag.outputs.tag }}
 
       - name: Wait for API
+        shell: cmd
         run: |
-          kubectl rollout status \
-            deployment/api-api \
-            -n ${{ env.NAMESPACE }} \
-            --timeout=180s
+          kubectl rollout status deployment/api-api -n %NAMESPACE% --timeout=180s
 
       - name: Wait for Backend
+        shell: cmd
         run: |
-          kubectl rollout status \
-            deployment/backend-backend \
-            -n ${{ env.NAMESPACE }} \
-            --timeout=180s
+          kubectl rollout status deployment/backend-backend -n %NAMESPACE% --timeout=180s
 
       - name: Wait for Frontend
+        shell: cmd
         run: |
-          kubectl rollout status \
-            deployment/frontend-frontend \
-            -n ${{ env.NAMESPACE }} \
-            --timeout=180s
+          kubectl rollout status deployment/frontend-frontend -n %NAMESPACE% --timeout=180s
 
       - name: Show pods
+        shell: cmd
         run: |
-          kubectl get pods \
-            -n ${{ env.NAMESPACE }} \
-            -o wide
+          kubectl get pods -n %NAMESPACE% -o wide
 
       - name: Show services
+        shell: cmd
         run: |
-          kubectl get services \
-            -n ${{ env.NAMESPACE }}
+          kubectl get services -n %NAMESPACE%
