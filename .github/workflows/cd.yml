@@ -1,6 +1,7 @@
 ﻿name: CD
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows:
       - CI
@@ -62,3 +63,4 @@ jobs:
 
           echo "=== DEPLOYMENTS ==="
           kubectl get deployments -n multi-cloud
+

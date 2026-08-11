@@ -1,6 +1,7 @@
 ﻿name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -85,3 +86,4 @@ jobs:
 
           docker push $ECR_REGISTRY/multi-cloud-devops-platform/frontend:${{ github.sha }}
           docker push $ECR_REGISTRY/multi-cloud-devops-platform/frontend:latest
+
