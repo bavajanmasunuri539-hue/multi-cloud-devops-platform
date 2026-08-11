@@ -1,9 +1,11 @@
-PROJECT_NAME=multi-cloud-devops-platform
-NAMESPACE=multi-cloud
-MONITORING_NAMESPACE=monitoring
-AWS_REGION=ap-south-1
+PROJECT_NAME := multi-cloud-devops-platform
+NAMESPACE := multi-cloud
+MONITORING_NAMESPACE := monitoring
+AWS_REGION := ap-south-1
+REPO := bavajanmasunuri539-hue/multi-cloud-devops-platform
 
 .PHONY: help
+
 help:
 	@echo "=============================================="
 	@echo " Multi-Cloud DevOps Platform - Makefile"
@@ -13,40 +15,57 @@ help:
 	@echo "  make docker-build       Build all Docker images"
 	@echo "  make docker-up          Start Docker Compose"
 	@echo "  make docker-down        Stop Docker Compose"
+	@echo "  make docker-restart     Restart Docker Compose"
 	@echo "  make docker-ps          Show Docker containers"
+	@echo "  make docker-logs        Show Docker logs"
+	@echo "  make docker-clean       Remove Docker containers"
 	@echo ""
 	@echo "Terraform:"
 	@echo "  make tf-init            Initialize Terraform"
+	@echo "  make tf-fmt             Format Terraform"
+	@echo "  make tf-validate        Validate Terraform"
 	@echo "  make tf-plan            Run Terraform plan"
 	@echo "  make tf-apply           Apply Terraform"
 	@echo "  make tf-destroy         Destroy Terraform infrastructure"
+	@echo "  make tf-output          Show Terraform outputs"
+	@echo "  make tf-state            Show Terraform state"
 	@echo ""
 	@echo "Kubernetes:"
-	@echo "  make k8s-status         Show cluster status"
+	@echo "  make k8s-status         Show cluster nodes"
 	@echo "  make k8s-pods           Show application pods"
 	@echo "  make k8s-services       Show services"
 	@echo "  make k8s-ingress        Show ingress"
 	@echo "  make k8s-deploy         Deploy applications"
+	@echo "  make k8s-deployments     Show deployments"
 	@echo "  make k8s-rollout        Check rollout status"
+	@echo "  make k8s-restart        Restart applications"
+	@echo "  make k8s-events         Show Kubernetes events"
 	@echo ""
 	@echo "Helm:"
 	@echo "  make helm-lint          Lint all Helm charts"
+	@echo "  make helm-template      Render Helm templates"
 	@echo "  make helm-status        Show Helm releases"
 	@echo "  make helm-deploy        Deploy Helm charts"
+	@echo "  make helm-uninstall     Uninstall application charts"
 	@echo ""
 	@echo "Monitoring:"
 	@echo "  make monitoring-status  Show Prometheus/Grafana"
+	@echo "  make monitoring-targets Show monitoring targets"
+	@echo "  make monitoring-install Install Prometheus/Grafana"
 	@echo "  make grafana            Port-forward Grafana"
 	@echo "  make prometheus         Port-forward Prometheus"
 	@echo ""
 	@echo "CI/CD:"
-	@echo "  make ci-status          Show latest CI run"
-	@echo "  make cd-status          Show latest CD run"
+	@echo "  make ci-status          Show latest CI runs"
+	@echo "  make cd-status          Show latest CD runs"
 	@echo "  make workflows          Show recent GitHub Actions"
+	@echo "  make ci-watch           Watch latest CI run"
+	@echo "  make cd-watch           Watch latest CD run"
 	@echo ""
 	@echo "Validation:"
+	@echo "  make validate            Validate project"
 	@echo "  make status              Show complete project status"
-	@echo "  make validate            Validate Kubernetes and Helm"
+	@echo "  make all                 Run complete validation"
 	@echo ""
 
 # ============================================================
@@ -82,43 +101,41 @@ docker-logs:
 docker-clean:
 	docker compose down --remove-orphans
 
-
 # ============================================================
 # TERRAFORM
 # ============================================================
 
 .PHONY: tf-init
 tf-init:
-	cd terraform && terraform init
+	terraform -chdir=terraform init
 
 .PHONY: tf-fmt
 tf-fmt:
-	cd terraform && terraform fmt -recursive
+	terraform -chdir=terraform fmt -recursive
 
 .PHONY: tf-validate
 tf-validate:
-	cd terraform && terraform validate
+	terraform -chdir=terraform validate
 
 .PHONY: tf-plan
 tf-plan:
-	cd terraform && terraform plan
+	terraform -chdir=terraform plan
 
 .PHONY: tf-apply
 tf-apply:
-	cd terraform && terraform apply -auto-approve
+	terraform -chdir=terraform apply -auto-approve
 
 .PHONY: tf-destroy
 tf-destroy:
-	cd terraform && terraform destroy -auto-approve
+	terraform -chdir=terraform destroy -auto-approve
 
 .PHONY: tf-output
 tf-output:
-	cd terraform && terraform output
+	terraform -chdir=terraform output
 
 .PHONY: tf-state
 tf-state:
-	cd terraform && terraform state list
-
+	terraform -chdir=terraform state list
 
 # ============================================================
 # KUBERNETES
@@ -170,7 +187,6 @@ k8s-events:
 k8s-delete:
 	kubectl delete namespace $(NAMESPACE)
 
-
 # ============================================================
 # HELM
 # ============================================================
@@ -202,7 +218,6 @@ helm-uninstall:
 	helm uninstall api -n $(NAMESPACE) || true
 	helm uninstall backend -n $(NAMESPACE) || true
 	helm uninstall frontend -n $(NAMESPACE) || true
-
 
 # ============================================================
 # MONITORING
@@ -238,48 +253,29 @@ monitoring-targets:
 	kubectl get servicemonitors -n $(MONITORING_NAMESPACE)
 	kubectl get prometheus -n $(MONITORING_NAMESPACE)
 
-
 # ============================================================
 # CI/CD
 # ============================================================
 
 .PHONY: ci-status
 ci-status:
-	gh run list --repo bavajanmasunuri539-hue/multi-cloud-devops-platform \
-		--workflow CI \
-		--limit 5
+	gh run list --repo $(REPO) --workflow CI --limit 5
 
 .PHONY: cd-status
 cd-status:
-	gh run list --repo bavajanmasunuri539-hue/multi-cloud-devops-platform \
-		--workflow CD \
-		--limit 5
+	gh run list --repo $(REPO) --workflow CD --limit 5
 
 .PHONY: workflows
 workflows:
-	gh run list --repo bavajanmasunuri539-hue/multi-cloud-devops-platform \
-		--limit 10
+	gh run list --repo $(REPO) --limit 10
 
 .PHONY: ci-watch
 ci-watch:
-	gh run watch $$(gh run list \
-		--repo bavajanmasunuri539-hue/multi-cloud-devops-platform \
-		--workflow CI \
-		--limit 1 \
-		--json databaseId \
-		--jq '.[0].databaseId') \
-		--repo bavajanmasunuri539-hue/multi-cloud-devops-platform
+	gh run watch $$(gh run list --repo $(REPO) --workflow CI --limit 1 --json databaseId --jq '.[0].databaseId') --repo $(REPO)
 
 .PHONY: cd-watch
 cd-watch:
-	gh run watch $$(gh run list \
-		--repo bavajanmasunuri539-hue/multi-cloud-devops-platform \
-		--workflow CD \
-		--limit 1 \
-		--json databaseId \
-		--jq '.[0].databaseId') \
-		--repo bavajanmasunuri539-hue/multi-cloud-devops-platform
-
+	gh run watch $$(gh run list --repo $(REPO) --workflow CD --limit 1 --json databaseId --jq '.[0].databaseId') --repo $(REPO)
 
 # ============================================================
 # VALIDATION
@@ -322,8 +318,7 @@ status:
 	kubectl get pods -n $(MONITORING_NAMESPACE)
 	@echo ""
 	@echo "=== Recent CI/CD ==="
-	gh run list --repo bavajanmasunuri539-hue/multi-cloud-devops-platform --limit 5
-
+	gh run list --repo $(REPO) --limit 5
 
 # ============================================================
 # COMPLETE CHECK
