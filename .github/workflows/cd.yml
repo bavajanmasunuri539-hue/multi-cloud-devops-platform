@@ -1,4 +1,4 @@
-name: CD
+﻿name: CD
 
 on:
   workflow_run:
@@ -6,98 +6,59 @@ on:
       - CI
     types:
       - completed
-    branches:
-      - main
-
-permissions:
-  contents: read
 
 env:
-  NAMESPACE: multi-cloud
+  AWS_REGION: ap-south-1
+  ECR_REGISTRY: 114403655423.dkr.ecr.ap-south-1.amazonaws.com
 
 jobs:
   deploy:
     name: Deploy to Kubernetes
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check Kubernetes
-        shell: cmd
-        run: |
-          kubectl version --client
-          kubectl get nodes
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Create namespace
-        shell: cmd
+      - name: Update kubeconfig
         run: |
-          kubectl create namespace %NAMESPACE% --dry-run=client -o yaml | kubectl apply -f -
-
-      - name: Helm version
-        shell: cmd
-        run: |
-          helm version
-
-      - name: Lint API chart
-        shell: cmd
-        run: |
-          helm lint ./helm/api
-
-      - name: Lint Backend chart
-        shell: cmd
-        run: |
-          helm lint ./helm/backend
-
-      - name: Lint Frontend chart
-        shell: cmd
-        run: |
-          helm lint ./helm/frontend
-
-      - name: Set image tag
-        id: tag
-        shell: cmd
-        run: |
-          echo tag=${{ github.event.workflow_run.head_sha }}>>%GITHUB_OUTPUT%
+          aws eks update-kubeconfig \
+            --region "$AWS_REGION" \
+            --name multi-cloud-devops-platform-prod-eks
 
       - name: Deploy API
-        shell: cmd
         run: |
-          helm upgrade --install api ./helm/api --namespace %NAMESPACE% --create-namespace --set image.tag=${{ steps.tag.outputs.tag }}
+          kubectl rollout restart deployment/api-api -n multi-cloud
+          kubectl rollout status deployment/api-api -n multi-cloud --timeout=180s
 
       - name: Deploy Backend
-        shell: cmd
         run: |
-          helm upgrade --install backend ./helm/backend --namespace %NAMESPACE% --create-namespace --set image.tag=${{ steps.tag.outputs.tag }}
+          kubectl rollout restart deployment/backend-backend -n multi-cloud
+          kubectl rollout status deployment/backend-backend -n multi-cloud --timeout=180s
 
       - name: Deploy Frontend
-        shell: cmd
         run: |
-          helm upgrade --install frontend ./helm/frontend --namespace %NAMESPACE% --create-namespace --set image.tag=${{ steps.tag.outputs.tag }}
+          kubectl rollout restart deployment/frontend-frontend -n multi-cloud
+          kubectl rollout status deployment/frontend-frontend -n multi-cloud --timeout=180s
 
-      - name: Wait for API
-        shell: cmd
+      - name: Verify deployment
         run: |
-          kubectl rollout status deployment/api-api -n %NAMESPACE% --timeout=180s
+          echo "=== PODS ==="
+          kubectl get pods -n multi-cloud
 
-      - name: Wait for Backend
-        shell: cmd
-        run: |
-          kubectl rollout status deployment/backend-backend -n %NAMESPACE% --timeout=180s
+          echo "=== SERVICES ==="
+          kubectl get svc -n multi-cloud
 
-      - name: Wait for Frontend
-        shell: cmd
-        run: |
-          kubectl rollout status deployment/frontend-frontend -n %NAMESPACE% --timeout=180s
-
-      - name: Show pods
-        shell: cmd
-        run: |
-          kubectl get pods -n %NAMESPACE% -o wide
-
-      - name: Show services
-        shell: cmd
-        run: |
-          kubectl get services -n %NAMESPACE%
+          echo "=== DEPLOYMENTS ==="
+          kubectl get deployments -n multi-cloud

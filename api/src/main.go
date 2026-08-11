@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Response struct {
@@ -27,6 +29,7 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/api/health", healthHandler)
+	http.Handle("/metrics", promhttp.Handler())
 
 	log.Println("API service running on port 8080")
 

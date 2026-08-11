@@ -13,7 +13,6 @@ env:
   ECR_REGISTRY: 114403655423.dkr.ecr.ap-south-1.amazonaws.com
 
 jobs:
-
   sonar:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
@@ -42,7 +41,6 @@ jobs:
 
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - name: Checkout
@@ -60,18 +58,30 @@ jobs:
 
       - name: Build and Push API
         run: |
-          docker build -t $ECR_REGISTRY/multi-cloud-devops-platform/api:${{ github.sha }} -t $ECR_REGISTRY/multi-cloud-devops-platform/api:latest ./api
+          docker build \
+            -t $ECR_REGISTRY/multi-cloud-devops-platform/api:${{ github.sha }} \
+            -t $ECR_REGISTRY/multi-cloud-devops-platform/api:latest \
+            ./api
+
           docker push $ECR_REGISTRY/multi-cloud-devops-platform/api:${{ github.sha }}
           docker push $ECR_REGISTRY/multi-cloud-devops-platform/api:latest
 
       - name: Build and Push Backend
         run: |
-          docker build -t $ECR_REGISTRY/multi-cloud-devops-platform/backend:${{ github.sha }} -t $ECR_REGISTRY/multi-cloud-devops-platform/backend:latest ./backend
+          docker build \
+            -t $ECR_REGISTRY/multi-cloud-devops-platform/backend:${{ github.sha }} \
+            -t $ECR_REGISTRY/multi-cloud-devops-platform/backend:latest \
+            ./backend
+
           docker push $ECR_REGISTRY/multi-cloud-devops-platform/backend:${{ github.sha }}
           docker push $ECR_REGISTRY/multi-cloud-devops-platform/backend:latest
 
       - name: Build and Push Frontend
         run: |
-          docker build -t $ECR_REGISTRY/multi-cloud-devops-platform/frontend:${{ github.sha }} -t $ECR_REGISTRY/multi-cloud-devops-platform/frontend:latest ./frontend
+          docker build \
+            -t $ECR_REGISTRY/multi-cloud-devops-platform/frontend:${{ github.sha }} \
+            -t $ECR_REGISTRY/multi-cloud-devops-platform/frontend:latest \
+            ./frontend
+
           docker push $ECR_REGISTRY/multi-cloud-devops-platform/frontend:${{ github.sha }}
           docker push $ECR_REGISTRY/multi-cloud-devops-platform/frontend:latest
