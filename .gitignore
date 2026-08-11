@@ -15,3 +15,5 @@ frontend/node_modules/
 *.tfstate.*
 *.tfplan
 terraform/tfplan
+
+# CI verification
