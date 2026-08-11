@@ -1,59 +1,17 @@
-# ================================
-# Secrets
-# ================================
-
-.env
-*.env
-*.pem
-*.key
-
-
-# ================================
-# Terraform
-# ================================
-
-.terraform/
-*.tfstate
-*.tfstate.*
-*.tfplan
-tfplan
-crash.log
-
-
-# ================================
-# Kubernetes
-# ================================
-
-kubeconfig
-
-
-# ================================
-# Docker
-# ================================
-
-docker-compose.override.yml
-
-
-# ================================
-# Python
-# ================================
-
-__pycache__/
-*.pyc
-
-
-# ================================
-# Node.js
-# ================================
-
-node_modules/
-
-
-# ================================
-# IDE
-# ================================
+﻿# ================================
 
 .vscode/
 .idea/
 kubernetes/manifests/secrets.yaml
 frontend/dist/
+
+
+# Local dependencies
+frontend/node_modules/
+
+# Terraform generated files
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform/tfplan

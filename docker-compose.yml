@@ -1,4 +1,4 @@
-services:
+﻿services:
 
   frontend:
     build:
@@ -18,7 +18,7 @@ services:
       dockerfile: Dockerfile
     container_name: multi-cloud-backend
     ports:
-      - "8083:8080"
+      - "8083:5000"
     depends_on:
       - api
     networks:
@@ -34,6 +34,38 @@ services:
     networks:
       - multi-cloud-network
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: multi-cloud-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    networks:
+      - multi-cloud-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: multi-cloud-grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - multi-cloud-network
+
 networks:
   multi-cloud-network:
     driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:

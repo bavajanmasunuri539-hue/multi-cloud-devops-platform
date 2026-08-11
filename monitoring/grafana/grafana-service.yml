@@ -1,0 +1,13 @@
+﻿  grafana:
+    image: grafana/grafana:latest
+    container_name: multi-cloud-grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - multi-cloud-network
