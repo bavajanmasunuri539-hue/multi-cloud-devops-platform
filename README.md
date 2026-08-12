@@ -1,52 +1,42 @@
 # Multi-Cloud DevOps Platform
 
-A production-style DevOps and cloud deployment platform demonstrating **Infrastructure as Code, containerization, Kubernetes orchestration, Helm deployments, CI/CD automation, monitoring, and AWS cloud infrastructure**.
+A production-style **DevOps and cloud-native deployment platform** demonstrating Infrastructure as Code, containerization, Kubernetes orchestration, Helm deployments, CI/CD automation, code quality analysis, container image management, and monitoring.
 
-The project deploys a three-tier microservices application consisting of:
+The platform deploys a three-tier microservices application consisting of:
 
-* **Frontend** - Node.js application
-* **Backend** - Python application
-* **API** - Go application
+* **Frontend** — Node.js
+* **Backend** — Python
+* **API** — Go
 
-The application is containerized with Docker, deployed to **Amazon EKS**, managed using **Helm**, provisioned with **Terraform**, automated through **GitHub Actions**, and monitored using **Prometheus, Grafana, Alertmanager, Node Exporter, and kube-state-metrics**.
+The application is containerized with Docker, provisioned using **Terraform**, deployed to **Amazon EKS**, packaged with **Helm**, automated through **GitHub Actions**, analyzed using **SonarQube**, supported by **Nexus Repository Manager**, and monitored using **Prometheus, Grafana, Alertmanager, Node Exporter, and kube-state-metrics**.
+
+> **Current documented cloud deployment: AWS (`ap-south-1`)**
 
 ---
 
-## 📌 Project Overview
+# 📌 Project Overview
 
-### Project Name
-
-`multi-cloud-devops-platform`
-
-### Cloud Platform
-
-**Amazon Web Services (AWS)**
-
-### AWS Region
-
-`ap-south-1`
-
-### Kubernetes Platform
-
-**Amazon EKS**
-
-### Kubernetes Version
-
-`v1.33.13-eks-254016e`
-
-### Application Namespace
-
-`multi-cloud`
-
-### Monitoring Namespace
-
-`monitoring`
+| Item                   | Details                       |
+| ---------------------- | ----------------------------- |
+| Project                | `multi-cloud-devops-platform` |
+| Cloud Platform         | AWS                           |
+| Region                 | `ap-south-1`                  |
+| Kubernetes Platform    | Amazon EKS                    |
+| Application Namespace  | `multi-cloud`                 |
+| Monitoring Namespace   | `monitoring`                  |
+| Infrastructure as Code | Terraform                     |
+| Containers             | Docker                        |
+| Package Management     | Helm                          |
+| CI/CD                  | GitHub Actions                |
+| Container Registry     | Amazon ECR                    |
+| Code Quality           | SonarQube                     |
+| Repository Manager     | Nexus                         |
+| Monitoring             | Prometheus + Grafana          |
+| Alerting               | Alertmanager                  |
 
 ---
 
 # 🏗️ Architecture
-
-The platform follows a cloud-native architecture:
 
 ```text
                          ┌─────────────────────┐
@@ -57,58 +47,65 @@ The platform follows a cloud-native architecture:
                                     ▼
                          ┌─────────────────────┐
                          │   GitHub Actions    │
-                         │      CI / CD        │
+                         │       CI / CD       │
                          └──────────┬──────────┘
                                     │
-                   ┌────────────────┴────────────────┐
-                   │                                 │
-                   ▼                                 ▼
-          ┌─────────────────┐               ┌─────────────────┐
-          │ Docker Images   │               │   SonarQube     │
-          │ Build & Push    │               │ Code Analysis   │
-          └────────┬────────┘               └─────────────────┘
-                   │
-                   ▼
-          ┌─────────────────────┐
-          │    AWS ECR         │
-          │ Container Registry │
-          └──────────┬──────────┘
+                    ┌───────────────┴───────────────┐
+                    │                               │
+                    ▼                               ▼
+             ┌───────────────┐              ┌───────────────┐
+             │ Docker Build  │              │   SonarQube   │
+             │ & Image Push  │              │ Code Analysis │
+             └───────┬───────┘              └───────────────┘
                      │
                      ▼
-        ┌────────────────────────────┐
-        │       Amazon EKS           │
-        │                            │
-        │  ┌──────────────────────┐  │
-        │  │ Kubernetes Ingress   │  │
-        │  └──────────┬───────────┘  │
-        │             │              │
-        │      ┌──────┴──────┐       │
-        │      ▼             ▼       │
-        │  ┌────────┐   ┌────────┐   │
-        │  │Frontend│   │Backend │   │
-        │  │Node.js │   │Python  │   │
-        │  └────────┘   └────┬───┘   │
-        │                    │       │
-        │                 ┌──▼───┐   │
-        │                 │ API  │   │
-        │                 │ Go   │   │
-        │                 └──────┘   │
-        └────────────────────────────┘
-                     │
-                     ▼
-          ┌────────────────────────────┐
-          │       Monitoring           │
-          │                            │
-          │ Prometheus + Grafana       │
-          │ Alertmanager               │
-          │ Node Exporter              │
-          │ kube-state-metrics         │
-          └────────────────────────────┘
+              ┌───────────────┐
+              │    AWS ECR    │
+              │   Container   │
+              │   Registry    │
+              └───────┬───────┘
+                      │
+                      ▼
+            ┌──────────────────────┐
+            │      Amazon EKS      │
+            │                      │
+            │   NGINX Ingress     │
+            │          │           │
+            │    ┌─────┴─────┐    │
+            │    ▼           ▼    │
+            │ Frontend     Backend│
+            │ Node.js      Python │
+            │                 │    │
+            │                 ▼    │
+            │                API   │
+            │                 Go   │
+            └──────────┬───────────┘
+                       │
+                       ▼
+            ┌──────────────────────┐
+            │      Monitoring      │
+            │                      │
+            │ Prometheus           │
+            │ Grafana              │
+            │ Alertmanager         │
+            │ Node Exporter        │
+            │ kube-state-metrics   │
+            └──────────────────────┘
 ```
 
-Detailed architecture documentation is available in:
+Detailed architecture documentation:
 
-`docs/screenshots/Architecture.md`
+```text
+docs/Architecture.md
+```
+
+### 📸 Architecture Evidence
+
+```markdown
+![AWS and Kubernetes Architecture](docs/screenshots/architecture.png)
+```
+
+> Replace the image filename above with the actual architecture screenshot available in the repository.
 
 ---
 
@@ -128,12 +125,12 @@ Infrastructure includes:
 * Route tables
 * Security groups
 * IAM roles
-* EKS cluster
+* Amazon EKS
 * EKS worker nodes
-* ECR repositories
+* Amazon ECR
 * Supporting AWS resources
 
-Terraform configuration is located under:
+Terraform configuration:
 
 ```text
 terraform/
@@ -141,11 +138,53 @@ terraform/
 
 ---
 
-## Containerization
+## Terraform Workflow
 
-Each application is packaged as a Docker container.
+```text
+Terraform Configuration
+        │
+        ▼
+terraform init
+        │
+        ▼
+terraform validate
+        │
+        ▼
+terraform plan
+        │
+        ▼
+terraform apply
+        │
+        ▼
+AWS Infrastructure
+```
 
-### Application services
+### Terraform State
+
+Terraform currently uses the **local backend** for development and practice.
+
+```text
+Terraform
+    │
+    ▼
+Local Backend
+    │
+    ▼
+terraform.tfstate
+    │
+    ▼
+AWS Infrastructure
+```
+
+For team-based or production environments, the project can be migrated to a remote **Amazon S3 backend** for centralized state management.
+
+> **Important:** Terraform state files can contain sensitive information and should not be committed to Git.
+
+---
+
+# 🐳 Containerization
+
+Each application service is packaged as a Docker container.
 
 | Service  | Technology | Container Port |
 | -------- | ---------- | -------------: |
@@ -153,26 +192,19 @@ Each application is packaged as a Docker container.
 | Backend  | Python     |           5000 |
 | API      | Go         |           8080 |
 
-Docker configuration is located in the individual application directories and the project `docker-compose.yml`.
+Docker configuration is located in the individual application directories.
+
+Local development is supported using:
+
+```text
+docker-compose.yml
+```
 
 ---
 
 # ☸️ Kubernetes
 
-The application runs on an Amazon EKS cluster.
-
-Current cluster nodes:
-
-```text
-ip-10-0-11-83.ap-south-1.compute.internal
-ip-10-0-12-17.ap-south-1.compute.internal
-```
-
-Both nodes are currently:
-
-```text
-STATUS: Ready
-```
+The application runs on **Amazon EKS**.
 
 Application namespace:
 
@@ -180,27 +212,38 @@ Application namespace:
 multi-cloud
 ```
 
-The application is deployed with two replicas for each service.
+The application is deployed with multiple replicas for availability.
 
-### Current deployments
+Example deployment structure:
 
 ```text
-api-api             2/2
-backend-backend     2/2
-frontend-frontend   2/2
+api-api
+backend-backend
+frontend-frontend
 ```
+
+### Kubernetes components
+
+* Pods
+* Deployments
+* Services
+* Ingress
+* Namespaces
+* ConfigMaps
+* Health checks
+* Rolling updates
 
 ---
 
 # 📦 Kubernetes Services
 
-The application uses Kubernetes `ClusterIP` services for internal communication.
+Internal application communication uses Kubernetes `ClusterIP` services.
 
-| Service           | Type      | Port |
-| ----------------- | --------- | ---: |
-| api-api           | ClusterIP | 8080 |
-| backend-backend   | ClusterIP | 5000 |
-| frontend-frontend | ClusterIP | 3000 |
+| Service             | Type      | Port |
+| ------------------- | --------- | ---: |
+| `api-api`           | ClusterIP | 8080 |
+| `backend-backend`   | ClusterIP | 5000 |
+| `frontend-frontend` | ClusterIP | 3000 |
 
 ---
 
@@ -208,30 +251,32 @@ The application uses Kubernetes `ClusterIP` services for internal communication.
 
 The frontend is exposed through an NGINX-based Kubernetes Ingress.
 
-Current ingress:
-
 ```text
-Name:     frontend-frontend
-Class:     nginx
-Host:      frontend.local
-Port:      80
+Client
+  │
+  ▼
+AWS Load Balancer
+  │
+  ▼
+NGINX Ingress
+  │
+  ▼
+Frontend Service
+  │
+  ▼
+Frontend Pods
 ```
 
-The AWS load balancer is provisioned through the Kubernetes ingress infrastructure.
-
-Example:
+Example host:
 
 ```text
 frontend.local
-      │
-      ▼
-NGINX Ingress
-      │
-      ▼
-Frontend Service
-      │
-      ▼
-Frontend Pods
+```
+
+Ingress configuration:
+
+```text
+kubernetes/ingress.yaml
 ```
 
 ---
@@ -240,8 +285,6 @@ Frontend Pods
 
 Helm is used to package and deploy the application services.
 
-The project contains three application charts:
-
 ```text
 helm/
 ├── api/
@@ -249,161 +292,22 @@ helm/
 └── frontend/
 ```
 
-Current Helm releases:
+Each chart contains:
 
-```text
-api
-backend
-frontend
-monitoring
-```
+* `Chart.yaml`
+* `values.yaml`
+* Kubernetes templates
+* Deployment configuration
+* Service configuration
+* ConfigMap configuration
 
-Current status:
-
-```text
-api         deployed
-backend     deployed
-frontend    deployed
-monitoring  deployed
-```
-
----
-
-# 📊 Monitoring
-
-The platform uses the **kube-prometheus-stack** for Kubernetes monitoring.
-
-Monitoring namespace:
-
-```text
-monitoring
-```
-
-Components include:
-
-* Prometheus
-* Grafana
-* Alertmanager
-* Prometheus Operator
-* Node Exporter
-* kube-state-metrics
-
----
-
-## Prometheus
-
-Prometheus is used to collect application and Kubernetes metrics.
-
-Current Prometheus version:
-
-```text
-v3.13.2-distroless
-```
-
-Prometheus service:
-
-```text
-monitoring-kube-prometheus-prometheus
-```
-
-Port:
-
-```text
-9090
-```
-
----
-
-## Grafana
-
-Grafana provides dashboards for monitoring:
-
-* Kubernetes nodes
-* Pods
-* CPU utilization
-* Memory utilization
-* Network metrics
-* Application metrics
-* Prometheus metrics
-
-Grafana service:
-
-```text
-monitoring-grafana
-```
-
-Port:
-
-```text
-80
-```
-
----
-
-## Alertmanager
-
-Alertmanager handles alerts generated by Prometheus.
-
-Current Alertmanager pod:
-
-```text
-alertmanager-monitoring-kube-prometheus-alertmanager-0
-```
-
----
-
-## ServiceMonitors
-
-The monitoring stack currently contains ServiceMonitor resources for:
-
-* Grafana
-* Alertmanager
-* Kubernetes API server
-* CoreDNS
-* kube-controller-manager
-* kube-etcd
-* kube-proxy
-* kube-scheduler
-* kubelet
-* Prometheus Operator
-* Prometheus
-* kube-state-metrics
-* Node Exporter
-
----
-
-# 🔎 Application Metrics
-
-The application exposes metrics endpoints that can be scraped by Prometheus.
-
-Example endpoints:
-
-```text
-http://api:8080/metrics
-http://backend:5000/metrics
-```
-
-Prometheus target health can be checked from:
-
-```text
-http://localhost:9090/targets
-```
-
-Example healthy targets:
-
-```text
-api        UP
-backend    UP
-prometheus UP
-```
+Helm provides repeatable application deployments and simplifies upgrades.
 
 ---
 
 # 🔄 CI/CD Pipeline
 
 GitHub Actions provides automated CI/CD.
-
-The pipeline follows:
 
 ```text
 Developer
@@ -415,19 +319,29 @@ Git Push
 GitHub Actions
     │
     ├── Checkout
-    │
-    ├── Code Quality
-    │
+    ├── Validation
     ├── SonarQube Analysis
-    │
     ├── Docker Build
-    │
-    ├── Container Image Push
-    │
-    └── Deployment
+    ├── Image Push
+    └── Helm Validation
+            │
+            ▼
+       CD Workflow
             │
             ▼
         Amazon EKS
+            │
+            ▼
+      Rolling Update
+```
+
+Workflow files:
+
+```text
+.github/workflows/
+├── ci.yml
+├── cd.yml
+└── destroy.yml
 ```
 
 ---
@@ -438,32 +352,32 @@ The CI workflow performs tasks such as:
 
 1. Checkout source code
 2. Set up required runtimes
-3. Run application validation
-4. Perform SonarQube analysis
+3. Validate application code
+4. Run SonarQube analysis
 5. Build Docker images
-6. Authenticate with container registry
-7. Push images
+6. Authenticate with the container registry
+7. Push container images
 8. Validate Helm charts
 
-Workflow file:
+Workflow:
 
 ```text
 .github/workflows/ci.yml
 ```
+
+### 📸 CI Evidence
+
+```markdown
+![GitHub Actions CI](docs/screenshots/ci-success.png)
+```
+
+> Use the actual screenshot filename from your repository.
 
 ---
 
 # 🚀 Continuous Deployment
 
 The CD workflow deploys the application to Kubernetes.
-
-Workflow file:
-
-```text
-.github/workflows/cd.yml
-```
-
-The deployment process includes:
 
 ```text
 CI Success
@@ -481,7 +395,173 @@ Helm Deployment
 Amazon EKS
     │
     ▼
-Rolling Update
+Kubernetes Rolling Update
+```
+
+Workflow:
+
+```text
+.github/workflows/cd.yml
+```
+
+### 📸 CD Evidence
+
+```markdown
+![GitHub Actions CD](docs/screenshots/cd-success.png)
+```
+
+---
+
+# 🔎 Code Quality — SonarQube
+
+SonarQube is integrated into the CI pipeline for automated code-quality analysis.
+
+```text
+Source Code
+    │
+    ▼
+SonarQube Analysis
+    │
+    ▼
+Quality Evaluation
+    │
+    ▼
+Docker Build
+```
+
+Configuration:
+
+```text
+sonar/
+```
+
+---
+
+# 📦 Container Repository — Nexus and Amazon ECR
+
+Nexus Repository Manager is included as part of the project's container management tooling.
+
+Configuration and documentation:
+
+```text
+nexus/
+```
+
+Amazon ECR is used as the AWS container registry.
+
+```text
+Application
+    │
+    ▼
+Docker Image
+    │
+    ▼
+Amazon ECR
+    │
+    ▼
+Amazon EKS
+```
+
+---
+
+# 📊 Monitoring and Observability
+
+The Kubernetes monitoring stack includes:
+
+* Prometheus
+* Grafana
+* Alertmanager
+* Prometheus Operator
+* Node Exporter
+* kube-state-metrics
+
+Monitoring namespace:
+
+```text
+monitoring
+```
+
+---
+
+## Prometheus
+
+Prometheus collects Kubernetes and application metrics.
+
+Example service:
+
+```text
+monitoring-kube-prometheus-prometheus
+```
+
+Port:
+
+```text
+9090
+```
+
+Prometheus targets can be inspected from:
+
+```text
+http://localhost:9090/targets
+```
+
+---
+
+## Grafana
+
+Grafana provides dashboards for:
+
+* Kubernetes nodes
+* Pods
+* CPU utilization
+* Memory utilization
+* Network metrics
+* Application metrics
+* Prometheus metrics
+
+### 📸 Grafana Evidence
+
+```markdown
+![Grafana Dashboard](docs/screenshots/grafana.png)
+```
+
+---
+
+## Alertmanager
+
+Alertmanager handles alerts generated by Prometheus.
+
+It provides centralized alert processing and routing.
+
+---
+
+## Node Exporter
+
+Node Exporter provides infrastructure-level metrics from Kubernetes worker nodes.
+
+---
+
+## kube-state-metrics
+
+kube-state-metrics exposes Kubernetes object state as metrics for Prometheus.
+
+---
+
+# 📈 Application Metrics
+
+Application metrics endpoints can be exposed for Prometheus scraping.
+
+Examples:
+
+```text
+http://api:8080/metrics
+http://backend:5000/metrics
+```
+
+Check Prometheus targets:
+
+```text
+http://localhost:9090/targets
 ```
 
 ---
@@ -494,21 +574,40 @@ Infrastructure cleanup is automated through:
 .github/workflows/destroy.yml
 ```
 
-Terraform is used to destroy AWS infrastructure when required.
+Terraform can destroy AWS infrastructure when required:
 
-**Warning:** Destroy operations can remove cloud resources and generate charges or data loss. Humanity invented `-auto-approve`, which is useful right up until someone points it at production.
+```powershell
+terraform destroy
+```
+
+> ⚠️ **Warning:** Destroy operations can remove cloud resources and may cause data loss. Always review the Terraform plan before performing destructive operations.
 
 ---
 
 # 🔐 Security
 
-The project follows several cloud security practices.
+The project follows several security practices.
 
-### IAM
+## IAM
 
-AWS IAM roles are used instead of embedding long-lived AWS credentials inside application containers.
+AWS IAM roles are used for AWS resource access rather than embedding long-lived credentials into application containers.
 
-### Kubernetes namespaces
+## Secrets
+
+Sensitive values should be stored outside source control using:
+
+* GitHub Actions Secrets
+* Kubernetes Secrets
+* AWS IAM
+* AWS Systems Manager where applicable
+
+Never commit credentials directly into Git.
+
+## Network Isolation
+
+The AWS architecture separates public and private networking resources.
+
+## Kubernetes Namespaces
 
 Application and monitoring resources are separated:
 
@@ -517,20 +616,19 @@ multi-cloud
 monitoring
 ```
 
-### Network isolation
+## Files That Must Not Be Committed
 
-The AWS architecture separates public and private networking resources.
-
-### Secrets
-
-Sensitive credentials should be stored using:
-
-* GitHub Actions Secrets
-* Kubernetes Secrets
-* AWS IAM
-* AWS Systems Manager where applicable
-
-Never commit credentials directly into Git.
+```text
+.env
+*.pem
+*.key
+credentials
+passwords
+tokens
+AWS access keys
+terraform.tfstate
+terraform.tfstate.*
+```
 
 ---
 
@@ -545,79 +643,128 @@ multi-cloud-devops-platform/
 │       ├── cd.yml
 │       └── destroy.yml
 │
+├── api/
+│   ├── src/
+│   │   ├── main.go
+│   │   ├── go.mod
+│   │   └── go.sum
+│   └── Dockerfile
+│
+├── backend/
+│   ├── app/
+│   │   ├── app.py
+│   │   └── requirements.txt
+│   └── Dockerfile
+│
+├── frontend/
+│   ├── src/
+│   ├── package.json
+│   ├── package-lock.json
+│   └── Dockerfile
+│
 ├── terraform/
-│   ├── modules/
-│   ├── environments/
 │   ├── main.tf
 │   ├── provider.tf
 │   ├── variables.tf
 │   ├── outputs.tf
-│   └── terraform.tfvars
-│
-├── kubernetes/
-│   ├── namespace.yaml
-│   ├── ingress.yaml
-│   └── ...
+│   ├── versions.tf
+│   ├── terraform.tfvars
+│   │
+│   ├── modules/
+│   │   ├── vpc/
+│   │   ├── eks/
+│   │   ├── ec2/
+│   │   ├── ecr/
+│   │   ├── rds/
+│   │   └── alb/
+│   │
+│   └── environments/
+│       └── prod/
 │
 ├── helm/
 │   ├── api/
 │   ├── backend/
 │   └── frontend/
 │
+├── kubernetes/
+│   ├── namespace.yaml
+│   ├── ingress.yaml
+│   ├── api/
+│   ├── backend/
+│   └── frontend/
+│
+├── monitoring/
+│   ├── prometheus/
+│   ├── grafana/
+│   ├── alertmanager/
+│   └── servicemonitors/
+│
 ├── nexus/
+│   ├── README.md
+│   └── configuration/
 │
 ├── sonar/
+│   ├── README.md
+│   └── sonar-project.properties
 │
 ├── scripts/
+│   ├── deploy.sh
+│   ├── health-check.sh
+│   ├── install.sh
+│   └── cleanup.sh
 │
 ├── docs/
 │   ├── Architecture.md
 │   ├── cicd.md
 │   ├── deployment.md
-│   ├── kuberneties.md
+│   ├── kubernetes.md
+│   ├── monitoring.md
+│   ├── terraform.md
+│   ├── troubleshooting.md
 │   └── screenshots/
 │
 ├── docker-compose.yml
 ├── Makefile
 ├── README.md
-└── LICENSE
+├── LICENSE
+└── .gitignore
 ```
 
 ---
 
 # 🛠️ Technologies Used
 
-| Category           | Technology         |
-| ------------------ | ------------------ |
-| Cloud              | AWS                |
-| Infrastructure     | Terraform          |
-| Containers         | Docker             |
-| Orchestration      | Kubernetes         |
-| Managed Kubernetes | Amazon EKS         |
-| Package Management | Helm               |
-| CI/CD              | GitHub Actions     |
-| Container Registry | Amazon ECR         |
-| Code Quality       | SonarQube          |
-| Repository Manager | Nexus              |
-| Monitoring         | Prometheus         |
-| Visualization      | Grafana            |
-| Alerting           | Alertmanager       |
-| Metrics            | Node Exporter      |
-| Kubernetes Metrics | kube-state-metrics |
-| Frontend           | Node.js            |
-| Backend            | Python             |
-| API                | Go                 |
-| Source Control     | Git / GitHub       |
-| Automation         | Make               |
+| Category               | Technology         |
+| ---------------------- | ------------------ |
+| Cloud                  | AWS                |
+| Infrastructure as Code | Terraform          |
+| Containers             | Docker             |
+| Orchestration          | Kubernetes         |
+| Managed Kubernetes     | Amazon EKS         |
+| Package Management     | Helm               |
+| CI/CD                  | GitHub Actions     |
+| Container Registry     | Amazon ECR         |
+| Code Quality           | SonarQube          |
+| Repository Manager     | Nexus              |
+| Monitoring             | Prometheus         |
+| Visualization          | Grafana            |
+| Alerting               | Alertmanager       |
+| Node Metrics           | Node Exporter      |
+| Kubernetes Metrics     | kube-state-metrics |
+| Frontend               | Node.js            |
+| Backend                | Python             |
+| API                    | Go                 |
+| Source Control         | Git / GitHub       |
+| Automation             | Make               |
 
 ---
 
 # 🧰 Prerequisites
 
-Install the following tools:
+Install:
 
 * Git
-* Docker Desktop
+* Docker
 * AWS CLI
 * Terraform
 * kubectl
@@ -667,12 +814,12 @@ aws sts get-caller-identity
 
 # ☸️ Connect to EKS
 
-Update the local kubeconfig:
+Update kubeconfig:
 
 ```powershell
 aws eks update-kubeconfig `
   --region ap-south-1 `
-  --name devops-eks-cluster
+  --name <EKS-CLUSTER-NAME>
 ```
 
 Verify:
@@ -681,43 +828,35 @@ Verify:
 kubectl get nodes
 ```
 
-Expected result:
-
-```text
-STATUS
-Ready
-Ready
-```
-
 ---
 
 # 🏗️ Terraform Commands
 
-Initialize Terraform:
+Initialize:
 
 ```powershell
 make tf-init
 ```
 
-Format Terraform:
+Format:
 
 ```powershell
 make tf-fmt
 ```
 
-Validate Terraform:
+Validate:
 
 ```powershell
 make tf-validate
 ```
 
-Create execution plan:
+Create plan:
 
 ```powershell
 make tf-plan
 ```
 
-Apply infrastructure:
+Apply:
 
 ```powershell
 make tf-apply
@@ -729,13 +868,13 @@ View outputs:
 make tf-output
 ```
 
-View Terraform state:
+View state:
 
 ```powershell
 make tf-state
 ```
 
-Destroy infrastructure:
+Destroy:
 
 ```powershell
 make tf-destroy
@@ -745,7 +884,7 @@ make tf-destroy
 
 # ⎈ Helm Commands
 
-Lint all charts:
+Lint charts:
 
 ```powershell
 make helm-lint
@@ -763,13 +902,13 @@ View releases:
 make helm-status
 ```
 
-Deploy application:
+Deploy:
 
 ```powershell
 make helm-deploy
 ```
 
-Uninstall application charts:
+Uninstall:
 
 ```powershell
 make helm-uninstall
@@ -803,12 +942,6 @@ Check ingress:
 make k8s-ingress
 ```
 
-Deploy applications:
-
-```powershell
-make k8s-deploy
-```
-
 Check rollout:
 
 ```powershell
@@ -821,7 +954,7 @@ Restart deployments:
 make k8s-restart
 ```
 
-View Kubernetes events:
+View events:
 
 ```powershell
 make k8s-events
@@ -831,7 +964,7 @@ make k8s-events
 
 # 📈 Monitoring Commands
 
-Check monitoring components:
+Check monitoring:
 
 ```powershell
 make monitoring-status
@@ -849,7 +982,7 @@ Forward Grafana:
 make grafana
 ```
 
-Then open:
+Open:
 
 ```text
 http://localhost:3001
@@ -861,13 +994,13 @@ Forward Prometheus:
 make prometheus
 ```
 
-Then open:
+Open:
 
 ```text
 http://localhost:9090
 ```
 
-Check monitoring targets:
+Check targets:
 
 ```powershell
 make monitoring-targets
@@ -889,19 +1022,19 @@ View CD runs:
 make cd-status
 ```
 
-View recent workflows:
+View workflows:
 
 ```powershell
 make workflows
 ```
 
-Watch the latest CI workflow:
+Watch CI:
 
 ```powershell
 make ci-watch
 ```
 
-Watch the latest CD workflow:
+Watch CD:
 
 ```powershell
 make cd-watch
@@ -909,98 +1042,15 @@ make cd-watch
 
 ---
 
-# 🧪 Validation
-
-Run the complete validation:
-
-```powershell
-make validate
-```
-
-This checks:
-
-* Terraform configuration
-* Helm charts
-* Kubernetes nodes
-* Application pods
-
-Expected result:
-
-```text
-Terraform:
-Success! The configuration is valid.
-
-Helm:
-1 chart(s) linted, 0 chart(s) failed
-
-Kubernetes:
-Nodes Ready
-Pods Running
-```
-
----
-
-# 📋 Project Status
-
-Use:
-
-```powershell
-make status
-```
-
-This displays:
-
-* Kubernetes nodes
-* Application pods
-* Deployments
-* Services
-* Ingress
-* Helm releases
-* Monitoring pods
-* Recent CI/CD runs
-
-Current project state:
-
-```text
-Kubernetes Nodes
-2/2 Ready
-
-API
-2/2 Running
-
-Backend
-2/2 Running
-
-Frontend
-2/2 Running
-
-Helm
-api        deployed
-backend    deployed
-frontend   deployed
-monitoring  deployed
-
-Monitoring
-Prometheus       Running
-Grafana          Running
-Alertmanager     Running
-Node Exporter    Running
-kube-state-metrics Running
-```
-
----
-
 # 🐳 Docker Compose
 
-For local development:
-
-Build images:
+Build:
 
 ```powershell
 make docker-build
 ```
 
-Start services:
+Start:
 
 ```powershell
 make docker-up
@@ -1018,19 +1068,19 @@ View logs:
 make docker-logs
 ```
 
-Stop services:
+Stop:
 
 ```powershell
 make docker-down
 ```
 
-Restart services:
+Restart:
 
 ```powershell
 make docker-restart
 ```
 
-Clean Docker Compose resources:
+Clean:
 
 ```powershell
 make docker-clean
@@ -1038,90 +1088,39 @@ make docker-clean
 
 ---
 
-# 📸 Documentation and Evidence
+# 🧪 Validation
 
-Project evidence is stored in:
+Run the complete validation:
 
-```text
-docs/screenshots/
+```powershell
+make validate
 ```
 
-The documentation includes evidence for:
+Validation can include:
 
-* AWS infrastructure
-* Kubernetes cluster
-* Application deployment
-* Helm
-* CI/CD
-* Prometheus
-* Grafana
-* Monitoring targets
-* Project architecture
+* Terraform configuration
+* Helm charts
+* Kubernetes nodes
+* Application pods
+* Monitoring components
 
-Documentation files:
+Example:
 
 ```text
-docs/
-├── Architecture.md
-├── cicd.md
-├── deployment.md
-├── kuberneties.md
-└── screenshots/
+Terraform:
+Configuration is valid
+
+Helm:
+Charts linted successfully
+
+Kubernetes:
+Nodes Ready
+Pods Running
 ```
 
 ---
 
-# 📊 Current Validation Evidence
-
-The project has successfully demonstrated:
-
-### Terraform
-
-```text
-Success! The configuration is valid.
-```
-
-### Helm
-
-```text
-api       1 chart(s) linted, 0 chart(s) failed
-backend   1 chart(s) linted, 0 chart(s) failed
-frontend  1 chart(s) linted, 0 chart(s) failed
-```
-
-The Helm icon messages are informational warnings, not failures.
-
-### Kubernetes
-
-```text
-2 nodes Ready
-```
-
-### Application
-
-```text
-API       2/2 Running
-Backend   2/2 Running
-Frontend  2/2 Running
-```
-
-### Monitoring
-
-```text
-Prometheus       Running
-Grafana          Running
-Alertmanager     Running
-Node Exporter    Running
-kube-state-metrics Running
-```
-
-### CI/CD
-
-Recent CI and CD workflows have completed successfully.
-
----
-
-# 🔍 Useful Troubleshooting
+# 🔍 Troubleshooting
 
 ## Check all pods
 
@@ -1153,7 +1152,7 @@ kubectl get svc -n multi-cloud
 kubectl get ingress -n multi-cloud
 ```
 
-## Check Helm
+## Check Helm releases
 
 ```powershell
 helm list -A
@@ -1173,89 +1172,90 @@ kubectl describe deployment backend-backend -n multi-cloud
 kubectl describe deployment frontend-frontend -n multi-cloud
 ```
 
-## Check pod logs
+## Check application logs
 
 ```powershell
 kubectl logs -n multi-cloud deployment/api-api
-```
-
-```powershell
 kubectl logs -n multi-cloud deployment/backend-backend
-```
-
-```powershell
 kubectl logs -n multi-cloud deployment/frontend-frontend
 ```
 
 ---
 
-# 🔐 Environment Variables and Secrets
+# 📸 Documentation and Evidence
 
-The following types of values should be configured outside source control:
-
-```text
-AWS credentials
-AWS region
-ECR credentials
-SonarQube token
-Nexus credentials
-GitHub secrets
-Kubernetes secrets
-Database credentials
-```
-
-Never commit:
+Project documentation is stored under:
 
 ```text
-.env
-*.pem
-*.key
-credentials
-passwords
-tokens
-AWS access keys
+docs/
 ```
 
-Use `.gitignore` to prevent accidental commits.
+Documentation includes:
+
+```text
+docs/
+├── Architecture.md
+├── cicd.md
+├── deployment.md
+├── kubernetes.md
+├── monitoring.md
+├── terraform.md
+├── troubleshooting.md
+└── screenshots/
+```
+
+Recommended evidence:
+
+* AWS infrastructure
+* Terraform validation
+* EKS cluster
+* Kubernetes nodes
+* Kubernetes pods
+* ECR repositories
+* CI workflow
+* CD workflow
+* SonarQube
+* Nexus
+* Grafana
+* Prometheus targets
+* Application running
 
 ---
 
 # 🔁 Deployment Workflow
 
-The complete deployment lifecycle is:
-
 ```text
-1. Developer commits code
-             │
-             ▼
+1. Developer writes code
+          │
+          ▼
 2. Git push to GitHub
-             │
-             ▼
+          │
+          ▼
 3. GitHub Actions CI
-             │
-             ├── Checkout
-             ├── Build
-             ├── Test
-             ├── SonarQube
-             ├── Docker Build
-             └── Image Push
-             │
-             ▼
+          │
+          ├── Checkout
+          ├── Build
+          ├── Validate
+          ├── SonarQube
+          ├── Docker Build
+          └── Image Push
+          │
+          ▼
 4. CD Workflow
-             │
-             ▼
+          │
+          ▼
 5. Helm Deployment
-             │
-             ▼
+          │
+          ▼
 6. Amazon EKS
-             │
-             ▼
+          │
+          ▼
 7. Kubernetes Rolling Update
-             │
-             ▼
+          │
+          ▼
 8. Prometheus Monitoring
-             │
-             ▼
+          │
+          ▼
 9. Grafana Visualization
 ```
 
@@ -1263,25 +1263,20 @@ The complete deployment lifecycle is:
 
 # 🧭 Development Workflow
 
-Recommended development process:
-
 ```text
-Create feature
+Create Feature
       │
       ▼
-Develop locally
+Develop Locally
       │
       ▼
-Run Docker Compose
+Docker Compose
       │
       ▼
-Run tests
+Run Validation
       │
       ▼
-Run Make validation
-      │
-      ▼
-Commit changes
+Commit Changes
       │
       ▼
 Push to GitHub
@@ -1293,7 +1288,7 @@ CI
 CD
       │
       ▼
-EKS
+Amazon EKS
       │
       ▼
 Monitoring
@@ -1314,7 +1309,7 @@ This project demonstrates practical knowledge of:
 * Helm
 * GitHub Actions
 * CI/CD automation
-* Container registries
+* Amazon ECR
 * SonarQube
 * Nexus
 * Prometheus
@@ -1324,14 +1319,63 @@ This project demonstrates practical knowledge of:
 * Linux and shell automation
 * Git and GitHub
 * Makefile automation
+* Cloud troubleshooting
+
+---
+
+# 🏆 Project Highlights
+
+```text
+✓ AWS infrastructure managed with Terraform
+✓ Modular Terraform architecture
+✓ Amazon EKS Kubernetes cluster
+✓ Containerized microservices
+✓ Multiple replicas per application
+✓ Helm-based deployment
+✓ Kubernetes Ingress
+✓ AWS Load Balancing
+✓ GitHub Actions CI
+✓ GitHub Actions CD
+✓ Docker image build and publishing
+✓ Amazon ECR
+✓ SonarQube integration
+✓ Nexus integration
+✓ Prometheus monitoring
+✓ Grafana dashboards
+✓ Alertmanager
+✓ Node Exporter
+✓ kube-state-metrics
+✓ Makefile automation
+✓ Troubleshooting documentation
+✓ Deployment documentation
+✓ Monitoring evidence
+```
+
+---
+
+# 📊 Project Validation
+
+The project should be considered operational only after the corresponding components have been recently verified.
+
+Example validation checklist:
+
+```text
+Terraform        : Validated
+Kubernetes       : Verified
+Helm             : Verified
+CI               : Verified
+CD               : Verified
+Monitoring       : Verified
+Application      : Verified
+```
+
+> Update this section whenever the deployment changes so that the README reflects the actual project state.
 
 ---
 
 # 📚 Learning Outcomes
 
-By completing this project, the following DevOps concepts are demonstrated:
-
-### Cloud
+## Cloud
 
 * AWS VPC architecture
 * Public and private networking
@@ -1341,7 +1385,7 @@ By completing this project, the following DevOps concepts are demonstrated:
 * Load balancing
 * Security groups
 
-### Infrastructure
+## Infrastructure
 
 * Terraform modules
 * Terraform state
@@ -1349,14 +1393,14 @@ By completing this project, the following DevOps concepts are demonstrated:
 * Outputs
 * Infrastructure validation
 
-### Containers
+## Containers
 
 * Dockerfiles
 * Docker Compose
-* Multi-service applications
+* Microservices
 * Container image management
 
-### Kubernetes
+## Kubernetes
 
 * Pods
 * Deployments
@@ -1366,15 +1410,15 @@ By completing this project, the following DevOps concepts are demonstrated:
 * Rolling updates
 * Health checks
 
-### Helm
+## Helm
 
 * Helm charts
 * Values
 * Templates
 * Releases
-* Upgrade and rollback concepts
+* Deployment and upgrade concepts
 
-### CI/CD
+## CI/CD
 
 * GitHub Actions
 * Automated builds
@@ -1382,7 +1426,7 @@ By completing this project, the following DevOps concepts are demonstrated:
 * Docker image publishing
 * Automated deployment
 
-### Monitoring
+## Monitoring
 
 * Prometheus
 * Grafana
@@ -1393,74 +1437,21 @@ By completing this project, the following DevOps concepts are demonstrated:
 
 ---
 
-# 🏆 Project Highlights
+# 🔮 Future Improvements
 
-The project currently demonstrates:
+Possible enhancements include:
 
-```text
-✓ AWS infrastructure managed with Terraform
-✓ Amazon EKS Kubernetes cluster
-✓ Two Kubernetes worker nodes
-✓ Three containerized microservices
-✓ Two replicas per application
-✓ Helm-based deployment
-✓ NGINX Ingress
-✓ AWS Load Balancer
-✓ GitHub Actions CI
-✓ GitHub Actions CD
-✓ Docker image build and publishing
-✓ SonarQube integration
-✓ Nexus integration
-✓ Prometheus monitoring
-✓ Grafana dashboards
-✓ Alertmanager
-✓ Node Exporter
-✓ kube-state-metrics
-✓ Makefile automation
-✓ Project documentation
-✓ Monitoring evidence screenshots
-```
-
----
-
-# 📌 Final Project Status
-
-```text
-================================================
-        MULTI-CLOUD DEVOPS PLATFORM
-================================================
-
-Infrastructure       : AWS
-Region               : ap-south-1
-Kubernetes           : Amazon EKS
-Application Namespace: multi-cloud
-Monitoring Namespace : monitoring
-
-API                  : 2/2 Running
-Backend              : 2/2 Running
-Frontend             : 2/2 Running
-
-Kubernetes Nodes     : 2/2 Ready
-
-Helm API             : Deployed
-Helm Backend         : Deployed
-Helm Frontend        : Deployed
-Helm Monitoring      : Deployed
-
-Prometheus           : Running
-Grafana              : Running
-Alertmanager         : Running
-Node Exporter        : Running
-kube-state-metrics   : Running
-
-Terraform Validation : Passed
-Helm Lint            : Passed
-CI                   : Passed
-CD                   : Passed
-
-Overall Status       : OPERATIONAL
-================================================
-```
+* Remote Terraform state using Amazon S3
+* Terraform state locking
+* GitHub Actions OIDC authentication
+* CloudWatch integration
+* Additional Prometheus alert rules
+* Custom Grafana dashboards
+* Centralized logging
+* Automated security scanning
+* GitOps using Argo CD
+* Azure infrastructure for a true multi-cloud implementation
+* Automated integration testing
 
 ---
 
@@ -1468,15 +1459,19 @@ Overall Status       : OPERATIONAL
 
 **Masunuri Bavajan**
 
-DevOps & Multicloud Engineer
+DevOps & Cloud Engineer
 
-GitHub:
+### GitHub
 
-`https://github.com/bavajanmasunuri539-hue`
+```text
+https://github.com/bavajanmasunuri539-hue/multi-cloud-devops-platform
+```
 
-LinkedIn:
+### LinkedIn
 
-`https://www.linkedin.com/in/bavajan-masunuri-1406453a4`
+```text
+https://www.linkedin.com/in/bavajan-masunuri-1406453a4
+```
 
 ---
 
@@ -1488,170 +1483,30 @@ This project is licensed under the terms specified in the repository `LICENSE` f
 
 # ⭐ Summary
 
-The **Multi-Cloud DevOps Platform** demonstrates an end-to-end DevOps implementation using AWS, Terraform, Docker, Kubernetes, Helm, GitHub Actions, SonarQube, Nexus, Prometheus, and Grafana.
+The **Multi-Cloud DevOps Platform** demonstrates an end-to-end cloud-native DevOps workflow using AWS, Terraform, Docker, Kubernetes, Helm, GitHub Actions, SonarQube, Nexus, Prometheus, Grafana, and Alertmanager.
 
-The platform provides automated infrastructure provisioning, containerized application deployment, Kubernetes orchestration, CI/CD automation, and centralized monitoring.
-
-It is designed as a practical portfolio project demonstrating the complete lifecycle:
+The platform integrates:
 
 ```text
 Code
- ↓
+  ↓
 Build
- ↓
-Test
- ↓
+  ↓
+Validate
+  ↓
 Analyze
- ↓
+  ↓
 Containerize
- ↓
+  ↓
 Publish
- ↓
+  ↓
 Deploy
- ↓
+  ↓
 Orchestrate
- ↓
+  ↓
 Monitor
- ↓
+  ↓
 Operate
 ```
 
-The result is a repeatable cloud-native deployment platform with infrastructure automation, application automation, and observability integrated into a single DevOps workflow.
-
-
-multi-cloud-devops-platform/
-│
-├── .github/
-│   └── workflows/
-│       ├── ci.yml
-│       ├── cd.yml
-│       └── destroy.yml
-│
-├── api/
-│   ├── src/
-│   │   ├── main.go
-│   │   ├── go.mod
-│   │   └── go.sum
-│   └── Dockerfile
-│
-├── backend/
-│   ├── app/
-│   │   ├── app.py
-│   │   └── requirements.txt
-│   └── Dockerfile
-│
-├── frontend/
-│   ├── src/
-│   ├── package.json
-│   ├── package-lock.json
-│   └── Dockerfile
-│
-├── terraform/
-│   ├── main.tf
-│   ├── provider.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── versions.tf
-│   ├── terraform.tfvars
-│   │
-│   ├── modules/
-│   │   ├── vpc/
-│   │   │   ├── main.tf
-│   │   │   ├── variables.tf
-│   │   │   └── outputs.tf
-│   │   │
-│   │   ├── eks/
-│   │   │   ├── main.tf
-│   │   │   ├── variables.tf
-│   │   │   └── outputs.tf
-│   │   │
-│   │   ├── ec2/
-│   │   ├── ecr/
-│   │   ├── rds/
-│   │   └── alb/
-│   │
-│   └── environments/
-│       └── prod/
-│
-├── helm/
-│   ├── api/
-│   │   ├── Chart.yaml
-│   │   ├── values.yaml
-│   │   └── templates/
-│   │       ├── deployment.yaml
-│   │       ├── service.yaml
-│   │       ├── configmap.yaml
-│   │       └── _helpers.tpl
-│   │
-│   ├── backend/
-│   │   ├── Chart.yaml
-│   │   ├── values.yaml
-│   │   └── templates/
-│   │       ├── deployment.yaml
-│   │       ├── service.yaml
-│   │       ├── configmap.yaml
-│   │       └── _helpers.tpl
-│   │
-│   └── frontend/
-│       ├── Chart.yaml
-│       ├── values.yaml
-│       └── templates/
-│           ├── deployment.yaml
-│           ├── service.yaml
-│           ├── ingress.yaml
-│           ├── configmap.yaml
-│           └── _helpers.tpl
-│
-├── kubernetes/
-│   ├── namespace.yaml
-│   ├── ingress.yaml
-│   ├── api/
-│   ├── backend/
-│   └── frontend/
-│
-├── monitoring/
-│   ├── prometheus/
-│   ├── grafana/
-│   ├── alertmanager/
-│   └── servicemonitors/
-│
-├── nexus/
-│   ├── README.md
-│   └── configuration/
-│
-├── sonar/
-│   ├── README.md
-│   └── sonar-project.properties
-│
-├── scripts/
-│   ├── deploy.sh
-│   ├── health-check.sh
-│   ├── install.sh
-│   └── cleanup.sh
-│
-├── docs/
-│   ├── Architecture.md
-│   ├── cicd.md
-│   ├── deployment.md
-│   ├── kubernetes.md
-│   ├── monitoring.md
-│   ├── terraform.md
-│   ├── troubleshooting.md
-│   │
-│   └── screenshots/
-│       ├── Architecture.md
-│       ├── Screenshot 2026-08-11 110610.png
-│       ├── Screenshot 2026-08-11 110634.png
-│       ├── Screenshot 2026-08-11 122052.png
-│       ├── Screenshot 2026-08-11 122356.png
-│       ├── Screenshot 2026-08-11 133518.png
-│       ├── Screenshot 2026-08-11 133531.png
-│       ├── Screenshot 2026-08-11 133706.png
-│       ├── Screenshot 2026-08-11 133816.png
-│       └── Screenshot 2026-08-11 133850.png
-│
-├── docker-compose.yml
-├── Makefile
-├── README.md
-├── LICENSE
-└── .gitignore
+The result is a repeatable DevOps platform demonstrating **Infrastructure as Code, CI/CD automation, containerization, Kubernetes orchestration, cloud infrastructure, monitoring, security practices, and troubleshooting**.
